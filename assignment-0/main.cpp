@@ -1,24 +1,23 @@
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
-#include "SpringMass.hpp"
 #include "SpringDamperMass.hpp"
+#include "SpringMass.hpp"
 
 using std::cout;
 using std::endl;
 
 // Return 0 if the two values are equal, else return 1
-template<typename T = double>
-int check_value(T expectedValue, T value) {
+template <typename T = double> int check_value(T expectedValue, T value) {
   if (round(value) == round(expectedValue))
     return 0;
-  
-  cout << "Wrong result: (Expected value: " << expectedValue
-       << " != " << value << ")" << endl;
+
+  cout << "Wrong result: (Expected value: " << expectedValue << " != " << value
+       << ")" << endl;
   return 1;
 }
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   // Test case 1: Spring mass system
   {
     SpringMass mass(200., 0., 161., 0.);
