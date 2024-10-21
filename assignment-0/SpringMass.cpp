@@ -11,14 +11,32 @@ SpringMass::SpringMass(
     double pos_eqm,
     double vel_eqm
 )
-    : initial_position(pos_init), initial_velocity(vel_init),
-      equilibrium_position(pos_eqm), equilibrium_velocity(vel_eqm) {}
+    : equilibrium_position(pos_eqm), equilibrium_velocity(vel_eqm),
+      current_timestep(0) {
+  Vec2d initial_state = {pos_init, vel_init};
+  motion_states.push_back(initial_state);
+}
 
-// TODO SpringMass simulation step
-int SpringMass::step() {}
+int SpringMass::step() {
+  Vec2d current_motion_state = motion_states.back();
+  double next_velocity =
+      current_motion_state.y -
+      (SPRING_CONST / MASS) * (current_motion_state.x - equilibrium_position);
+  double next_position = current_motion_state.x + next_velocity;
+  Vec2d next_state = {next_position, next_velocity};
+  motion_states.push_back(next_state);
+  current_timestep++;
+  return current_timestep;
+}
 
-// TODO SpringMass configuration getter
-bool SpringMass::getConfiguration(int t, Vec2d &state) const {}
+bool SpringMass::getConfiguration(int t, Vec2d &state) const {
+  if (current_timestep < t) {
+    return false;
+  }
+  state = motion_states[t];
+  return true;
+}
 
-// TODO SpringMass current simulation time getter
-int SpringMass::getCurrentSimulationTime() const {}
+int SpringMass::getCurrentSimulationTime() const { return current_timestep; }
+
+SpringMass::~SpringMass() = default;

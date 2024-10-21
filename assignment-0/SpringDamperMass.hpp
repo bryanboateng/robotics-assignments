@@ -18,15 +18,18 @@ public:
       double _damping_coeff
   );
 
-  // TODO define your methods here
+  int step() override;
+
+  /**
+   * @brief Destructor for the SpringDamperMass object
+   */
+  ~SpringDamperMass() override;
 
 private:
   /**
    * Damping coefficient for damper
    */
   double damping_coeff;
-
-  // TODO define additional members (if necessary) here
 };
 
 #endif // SPRING_DAMPER_MASS__H__

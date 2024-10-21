@@ -14,8 +14,6 @@
 struct Vec2d {
   double x;
   double y;
-
-  // TODO define members, methods, constructors etc.
 };
 
 /**
@@ -70,11 +68,10 @@ protected:
   static const double SPRING_CONST;
   static const double MASS;
 
-  // TODO define your methods and variables here
-  double initial_position;
-  double initial_velocity;
   double equilibrium_position;
   double equilibrium_velocity;
+  int current_timestep;
+  std::vector<Vec2d> motion_states;
 };
 
 #endif // SpringMass__H__
