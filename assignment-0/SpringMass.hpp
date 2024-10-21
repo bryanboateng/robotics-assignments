@@ -71,6 +71,10 @@ protected:
   static const double MASS;
 
   // TODO define your methods and variables here
+  double initial_position;
+  double initial_velocity;
+  double equilibrium_position;
+  double equilibrium_velocity;
 };
 
 #endif // SpringMass__H__
