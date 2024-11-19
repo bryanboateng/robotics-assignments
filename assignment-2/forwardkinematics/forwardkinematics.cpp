@@ -332,23 +332,23 @@ void ForwardKinematicsPuma2D::computeDH() {
   DH[0][0] = 0.0;
   DH[0][1] = 0.0;
   DH[0][2] = 0.0;
-  DH[0][3] = 0.0;
+  DH[0][3] = angles[0];
 
   // row vector
   DH[1][0] = 0.0;
-  DH[1][1] = 0.0;
+  DH[1][1] = l1;
   DH[1][2] = 0.0;
-  DH[1][3] = 0.0;
+  DH[1][3] = angles[1];
 
   // row vector
   DH[2][0] = 0.0;
-  DH[2][1] = 0.0;
+  DH[2][1] = l2;
   DH[2][2] = 0.0;
-  DH[2][3] = 0.0;
+  DH[2][3] = angles[2];
 
   // row vector
   DH[3][0] = 0.0;
-  DH[3][1] = 0.0;
+  DH[3][1] = l3;
   DH[3][2] = 0.0;
   DH[3][3] = 0.0;
 }
