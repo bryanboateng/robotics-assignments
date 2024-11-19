@@ -112,28 +112,28 @@ void ForwardKinematicsPuma2D::computeT0_1() {
   // angles[0], angles[1], angles[2], l1, l2, and l3
 
   // row vector
-  T0_1[0][0] = 0.0;
-  T0_1[0][1] = 0.0;
+  T0_1[0][0] = cos(angles[0]);
+  T0_1[0][1] = -sin(angles[0]);
   T0_1[0][2] = 0.0;
   T0_1[0][3] = 0.0;
 
   // row vector
-  T0_1[1][0] = 0.0;
-  T0_1[1][1] = 0.0;
+  T0_1[1][0] = sin(angles[0]);
+  T0_1[1][1] = cos(angles[0]);
   T0_1[1][2] = 0.0;
   T0_1[1][3] = 0.0;
 
   // row vector
   T0_1[2][0] = 0.0;
   T0_1[2][1] = 0.0;
-  T0_1[2][2] = 0.0;
+  T0_1[2][2] = 1.0;
   T0_1[2][3] = 0.0;
 
   // row vector
   T0_1[3][0] = 0.0;
   T0_1[3][1] = 0.0;
   T0_1[3][2] = 0.0;
-  T0_1[3][3] = 0.0;
+  T0_1[3][3] = 1.0;
 }
 
 /*
@@ -147,28 +147,28 @@ void ForwardKinematicsPuma2D::computeT1_2() {
   // angles[0], angles[1], angles[2], l1, l2, and l3
 
   // row vector
-  T1_2[0][0] = 0.0;
-  T1_2[0][1] = 0.0;
+  T1_2[0][0] = cos(angles[1]);
+  T1_2[0][1] = -sin(angles[1]);
   T1_2[0][2] = 0.0;
-  T1_2[0][3] = 0.0;
+  T1_2[0][3] = l1;
 
   // row vector
-  T1_2[1][0] = 0.0;
-  T1_2[1][1] = 0.0;
+  T1_2[1][0] = sin(angles[1]);
+  T1_2[1][1] = cos(angles[1]);
   T1_2[1][2] = 0.0;
   T1_2[1][3] = 0.0;
 
   // row vector
   T1_2[2][0] = 0.0;
   T1_2[2][1] = 0.0;
-  T1_2[2][2] = 0.0;
+  T1_2[2][2] = 1.0;
   T1_2[2][3] = 0.0;
 
   // row vector
   T1_2[3][0] = 0.0;
   T1_2[3][1] = 0.0;
   T1_2[3][2] = 0.0;
-  T1_2[3][3] = 0.0;
+  T1_2[3][3] = 1.0;
 }
 
 /*
@@ -182,28 +182,28 @@ void ForwardKinematicsPuma2D::computeT2_3() {
   // angles[0], angles[1], angles[2], l1, l2, and l3
 
   // row vector
-  T2_3[0][0] = 0.0;
-  T2_3[0][1] = 0.0;
+  T2_3[0][0] = cos(angles[2]);
+  T2_3[0][1] = -sin(angles[2]);
   T2_3[0][2] = 0.0;
-  T2_3[0][3] = 0.0;
+  T2_3[0][3] = l2;
 
   // row vector
-  T2_3[1][0] = 0.0;
-  T2_3[1][1] = 0.0;
+  T2_3[1][0] = sin(angles[2]);
+  T2_3[1][1] = cos(angles[2]);
   T2_3[1][2] = 0.0;
   T2_3[1][3] = 0.0;
 
   // row vector
   T2_3[2][0] = 0.0;
   T2_3[2][1] = 0.0;
-  T2_3[2][2] = 0.0;
+  T2_3[2][2] = 1.0;
   T2_3[2][3] = 0.0;
 
   // row vector
   T2_3[3][0] = 0.0;
   T2_3[3][1] = 0.0;
   T2_3[3][2] = 0.0;
-  T2_3[3][3] = 0.0;
+  T2_3[3][3] = 1.0;
 }
 
 /*
@@ -217,28 +217,28 @@ void ForwardKinematicsPuma2D::computeT3_E() {
   // angles[0], angles[1], angles[2], l1, l2, and l3
 
   // row vector
-  T3_E[0][0] = 0.0;
+  T3_E[0][0] = 1.0;
   T3_E[0][1] = 0.0;
   T3_E[0][2] = 0.0;
-  T3_E[0][3] = 0.0;
+  T3_E[0][3] = l3;
 
   // row vector
   T3_E[1][0] = 0.0;
-  T3_E[1][1] = 0.0;
+  T3_E[1][1] = 1.0;
   T3_E[1][2] = 0.0;
   T3_E[1][3] = 0.0;
 
   // row vector
   T3_E[2][0] = 0.0;
   T3_E[2][1] = 0.0;
-  T3_E[2][2] = 0.0;
+  T3_E[2][2] = 1.0;
   T3_E[2][3] = 0.0;
 
   // row vector
   T3_E[3][0] = 0.0;
   T3_E[3][1] = 0.0;
   T3_E[3][2] = 0.0;
-  T3_E[3][3] = 0.0;
+  T3_E[3][3] = 1.0;
 }
 
 /*
@@ -254,28 +254,28 @@ void ForwardKinematicsPuma2D::computeT0_E() {
   // angles[0], angles[1], angles[2], l1, l2, and l3
 
   // row vector
-  T0_E[0][0] = 0.0;
-  T0_E[0][1] = 0.0;
-  T0_E[0][2] = 0.0;
-  T0_E[0][3] = 0.0;
+  T0_E[0][0] = cos(angles[0] + angles[1] + angles[2]);
+  T0_E[0][1] = -sin(angles[0] + angles[1] + angles[2]);
+  T0_E[0][2] = 0;
+  T0_E[0][3] = l1 * cos(angles[0]) + l2 * cos(angles[0] + angles[1]) + l3 * cos(angles[0] + angles[1] + angles[2]);
 
   // row vector
-  T0_E[1][0] = 0.0;
-  T0_E[1][1] = 0.0;
-  T0_E[1][2] = 0.0;
-  T0_E[1][3] = 0.0;
+  T0_E[1][0] = sin(angles[0] + angles[1] + angles[2]);
+  T0_E[1][1] = cos(angles[0] + angles[1] + angles[2]);
+  T0_E[1][2] = 0;
+  T0_E[1][3] = l1 * sin(angles[0]) + l2* sin(angles[0] + angles[1]) + l3 * sin(angles[0] + angles[1] + angles[2]);
 
   // row vector
   T0_E[2][0] = 0.0;
   T0_E[2][1] = 0.0;
-  T0_E[2][2] = 0.0;
+  T0_E[2][2] = 1.0;
   T0_E[2][3] = 0.0;
 
   // row vector
   T0_E[3][0] = 0.0;
   T0_E[3][1] = 0.0;
   T0_E[3][2] = 0.0;
-  T0_E[3][3] = 0.0;
+  T0_E[3][3] = 1.0;
 }
 
 /*
