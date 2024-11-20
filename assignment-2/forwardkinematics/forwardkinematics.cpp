@@ -257,13 +257,15 @@ void ForwardKinematicsPuma2D::computeT0_E() {
   T0_E[0][0] = cos(angles[0] + angles[1] + angles[2]);
   T0_E[0][1] = -sin(angles[0] + angles[1] + angles[2]);
   T0_E[0][2] = 0;
-  T0_E[0][3] = l1 * cos(angles[0]) + l2 * cos(angles[0] + angles[1]) + l3 * cos(angles[0] + angles[1] + angles[2]);
+  T0_E[0][3] = l1 * cos(angles[0]) + l2 * cos(angles[0] + angles[1]) +
+               l3 * cos(angles[0] + angles[1] + angles[2]);
 
   // row vector
   T0_E[1][0] = sin(angles[0] + angles[1] + angles[2]);
   T0_E[1][1] = cos(angles[0] + angles[1] + angles[2]);
   T0_E[1][2] = 0;
-  T0_E[1][3] = l1 * sin(angles[0]) + l2* sin(angles[0] + angles[1]) + l3 * sin(angles[0] + angles[1] + angles[2]);
+  T0_E[1][3] = l1 * sin(angles[0]) + l2 * sin(angles[0] + angles[1]) +
+               l3 * sin(angles[0] + angles[1] + angles[2]);
 
   // row vector
   T0_E[2][0] = 0.0;
