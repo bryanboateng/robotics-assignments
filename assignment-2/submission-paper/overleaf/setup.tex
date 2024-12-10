@@ -1,0 +1,173 @@
+\documentclass[a4paper,12pt]{scrartcl}
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+\usepackage[nenglish]{babel}
+% \addto\captionsngerman{\renewcommand{\refname}{Quellenverzeichnis}}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum} % Erzeugt Blindtext. Kann von euch auskommentiert werden.
+
+% Pakete für Bibtex/Quellenangaben
+% Werden bereits hier geladen, weil es sonst zu einer Kollision zwischen zwei Packages kommt.
+\usepackage[noadjust]{cite}
+\usepackage[hyphens]{url}	% Nutze vorhandene Bindestriche für Zeilenumbrüche in URLs.
+\usepackage{etoolbox}
+\apptocmd{\sloppy}{\hbadness 10000\relax}{}{}	% Ignoriere Boxen mit zu viel Weißraum im 'sloppy'-Modus.
+
+% Pakete für Einheiten
+\usepackage{siunitx}
+\sisetup{
+  output-decimal-marker = {,},
+  inter-unit-product = \ensuremath{{}\cdot{}},
+  range-phrase = ...
+}
+
+% Pakete für Formeln
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bigints}
+\renewcommand{\theequation}{\arabic{section}.\arabic{subsection}}	% Formeln mit genauer Abschnittangabe beschriften.
+\numberwithin{equation}{subsection}  % Die Nummerierung einer Gleichung hinten anhängen.
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}} % Einzelne Nummerierung innerhalb von 'align*'-Umgebung.
+
+% Pakete für Quellcode und Verzeichnisse
+% Werden bereits hier geladen, weil es sonst zu einer Kollision zwischen zwei Packages kommt.
+\usepackage{enumerate}
+\usepackage[]{listofsymbols}
+\usepackage{listings}
+\renewcommand{\lstlistlistingname}{Codelistenverzeichnis}
+\usepackage{scrhack}  % Löst Probleme mit veralteten KOMA-Befehlen im 'listings'-Package.
+\usepackage{paralist} % Mehr Optionen beim Erstellen von Aufzählungen ('\enumerate').
+%\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[usenames,dvipsnames,table,xcdraw]{xcolor}
+\lstset{
+	basicstyle = \scriptsize\ttfamily,
+  keywordstyle = \bfseries\ttfamily\color{NavyBlue},
+  stringstyle = \color{violet}\ttfamily,
+  commentstyle = \color{green}\ttfamily,
+  emph = {square}, 
+  emphstyle = \color{blue}\texttt,
+  emph = {[2]root,base},
+  emphstyle = {[2]\color{yac}\texttt},
+  language = c,
+  tabsize = 2,
+  basicstyle = \footnotesize\ttfamily,
+  numbers = left,
+  numberfirstline,
+  breaklines = true,
+  breakatwhitespace = true,
+  linewidth = \textwidth,
+  xleftmargin = 0.075\textwidth,
+  frame = tlrb,
+  captionpos = b,
+  inputencoding = {utf8},
+  extendedchars = false
+}
+
+% Pakete für Grafiken
+\usepackage{graphicx, epstopdf}
+%\usepackage{subfig}
+\usepackage{subcaption}
+\usepackage{rotating}
+\usepackage{float}
+\usepackage{picinpar}
+\usepackage[section]{placeins}
+%\usepackage{hyperref}					    % Wird ganz zum Schluss geladen (s.u.), sonst kommt es zu Warnungen.
+\usepackage{microtype}              % Schriftbildverschönerung
+\usepackage{textcomp}               % Fügt zusätzliche Symbole im Textmodus ein.
+\usepackage[format = hang]{caption} % Einstellungen für Bildunter- bzw. überschriften:
+\pdfminorversion = 6
+
+\usepackage{matlab-prettifier}
+% Pakete für Schaltpläne/Zeichnungen
+\usepackage{pgfplots}
+\pgfplotsset{compat = 1.13,
+             /pgf/number format/.cd,
+             use comma,
+             1000 sep = {}}
+\usepackage{tikz}							    % TIKZ-Paket
+\usepackage{circuitikz}					  % Schaltpläne mit TIKZ erstellen.
+\usetikzlibrary{matrix,           % Mehr Optionen zum Erstellen und Formatieren von Matrizen.
+                shapes,           % Stellt weitere geometrische Formen zur Verfügung.
+                arrows.meta,      % Mehr Optionen zum Erstellen und Formatieren von Pfeilen.
+                positioning,      % Erweiterte Optionen zum Platzieren von Objekten.
+                circuits.ee.IEC,  % Beinhaltet die offiziellen IEC-Schaltzeichen.
+                calc}             % Ermöglicht komplexe Berechnungen mit Koordinaten.
+\usepackage{marvosym}             % Fügt einige Symbole zur Verwendung in Grafiken hinzu.
+
+\newcommand{\sbt}{\,\begin{picture}(-1,1)(-1,-3)\circle*{3}\end{picture}\ }
+
+% Pakete für Tabellen
+\usepackage{array}
+\usepackage{tabularx}
+\newcolumntype{w}[1]{>{\raggedleft\hspace{0pt}}p{#1}}
+\usepackage{bigdelim}         % Ermöglicht bessere Formatierung der Zellen untereinander.
+\usepackage{booktabs}         % Ermöglicht besseres Tabellen-Layout.
+
+% Pakete für Style/Formatierung
+%\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{ulem}
+\usepackage{setspace}
+\usepackage[a4paper,
+            lmargin = {25mm},
+            rmargin = {25mm},
+            tmargin = {25mm},
+            bmargin = {25mm}]{geometry}
+%\addtolength{\footskip}{-0.8cm}  % Fussbereich 0,8 cm höher, so dass die Seitennummierung höher ist.
+\onehalfspacing
+%%Kopfzeile erstellen
+	\pagestyle{fancy}
+	\fancyhf{}
+	\fancyhead[R]{
+	\begin{tabular}[b]{l}
+	\shorttitle %Kopfzeile rechts
+	\end{tabular}}
+	\fancyhead[L]{
+	\begin{tabular}[b]{l}
+	\end{tabular}}
+	\renewcommand{\headrulewidth}{0.5pt} %obere Trennlinie
+
+%% Fußzeile ersellen
+	\fancyfoot[R]{\thepage} %Seitennummer
+	\fancyfoot[L]{\shortauthor} %Kopfzeile unten
+	\renewcommand{\footrulewidth}{0.4pt} %untere Trennlinie
+
+% Anhang
+\usepackage[title, titletoc]{appendix}
+
+%\usepackage{scrlayer-scrpage}				  % KOMA-Paket
+\usepackage[pdfpagelabels]{hyperref}	% Muss ganz zum Schluss geladen werden (s.o.).
+
+%\usepackage{graphicx}
+%\usepackage[demo]{graphicx}
+\usepackage{babel,blindtext}
+
+
+%datenschutz
+\usepackage{censor}
+
+% Sorgt am Anfang eines Absatzes dafür, daß die erste Zeile nicht eingerückt wird.
+\setlength{\parindent}{0pt}
+
+% Math unit
+\usepackage{siunitx}
+
+% Code packages
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage[newfloat]{minted}
+\usepackage{xcolor} % to access the named colour LightGray
+\definecolor{LightGray}{gray}{0.9}
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\SetupFloatingEnvironment{listing}{name=Code Listing}
+
+
+\usepackage{threeparttable}
+\renewcommand{\figurename}{Figure}
+ \renewcommand{\tablename}{Table}
+
+\usepackage{mathtools}
