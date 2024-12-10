@@ -1,26 +1,21 @@
-cmake_minimum_required (VERSION 2.8.11)
-project (vision)
+cmake_minimum_required(VERSION 2.8.11)
+project(assignment_1)
 
 set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(BEFORE ${PROJECT_SOURCE_DIR}/../include /opt/pumasim/include)
 
-# creates a convenient link to pumasim in the build directory
-add_custom_command(
-    TARGET controlDLL POST_BUILD
-    COMMAND ln -sf ../pumasim pumasim
+add_library(controlDLL SHARED
+	controlDLL/control.cpp
 )
 
-# For compilation of  the control loop library:
-add_library(controlDLL SHARED 
-    controlDLL/control.cpp
+# Add a custom target to create the symbolic link
+add_custom_target(create_pumasim_symlink ALL
+	COMMAND ln -sf ../pumasim pumasim
+	COMMENT "Creating symbolic link to pumasim"
 )
-target_link_libraries (controlDLL)
 
-# For compilation of  the vision loop library:
-# find_package(OpenCV REQUIRED)
-# add_library(cv_main SHARED 
-#    cv/cv_main.cpp 
-#    cv/cv_control.cpp
-# )
-# target_link_libraries (cv_main ${OpenCV_LIBS})
+# Make the library depend on the custom target
+add_dependencies(controlDLL create_pumasim_symlink)
+
+target_link_libraries(controlDLL)
