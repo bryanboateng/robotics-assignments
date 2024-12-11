@@ -59,7 +59,20 @@ void initVisualServoing(
  *the detected circle into crcl
  */
 bool findCircleFeature(Mat &img, Mat &backproject, Circle &crcl) {
-  // IMPLEMENT THIS
+  putText(
+      img, "Hello World", cvPoint(0, 12), FONT_HERSHEY_SIMPLEX, 0.5,
+      CV_RGB(0, 0, 255)
+  );
+  Mat blurred;
+  medianBlur(backproject, blurred, 5);
+  vector<Vec3f> circles;
+  HoughCircles(
+      blurred, circles, HOUGH_GRADIENT, 1, blurred.rows / 16, 100, 30, 0, 0
+  );
+  Vec3f circle;
+  crcl.center = Point2d(circle[0], circle[1]);
+  crcl.radius = circle[2];
+  return true;
 }
 
 /**
@@ -86,7 +99,19 @@ void getImageJacobianCFToFF(
     float f,
     float diameter
 ) {
-  // IMPLEMENT THIS
+  const float d = f * diameter / z;
+
+  Jv[0][0] = -f / z;
+  Jv[0][1] = 0;
+  Jv[0][2] = u / z;
+
+  Jv[1][0] = 0;
+  Jv[1][1] = -f / z;
+  Jv[1][2] = v / z;
+
+  Jv[2][0] = 0;
+  Jv[2][1] = 0;
+  Jv[2][2] = (d - f) / z;
 }
 
 /**
@@ -102,7 +127,7 @@ void getImageJacobianCFToFF(
  *  depth of the circle wrt the camera [meters]
  */
 float estimateCircleDepth(float f, float diameter, Circle &crcl) {
-  // IMPLEMENT THIS
+  return diameter * (crcl.radius * 2) / f;
 }
 
 /**
@@ -117,7 +142,9 @@ float estimateCircleDepth(float f, float diameter, Circle &crcl) {
  *  vector_ff: feature vector defined in feature frame
  */
 void transformFromOpenCVFToFF(PrVector3 vector_opencvf, PrVector3 &vector_ff) {
-  // IMPLEMENT THIS
+  vector_ff[0] = vector_opencvf[0] - img_height / 2;
+  vector_ff[1] = vector_opencvf[1] - img_width / 2;
+  vector_ff[2] = vector_opencvf[2];
 }
 
 /**
@@ -133,7 +160,9 @@ void transformFromOpenCVFToFF(PrVector3 vector_opencvf, PrVector3 &vector_ff) {
  *  vector_eef: velocity vector defined in end-effector frame
  */
 void transformVelocityFromCFToEEF(PrVector3 vector_cf, PrVector3 &vector_eef) {
-  // IMPLEMENT THIS
+  vector_eef[0] = -vector_cf[1];
+  vector_eef[1] = vector_cf[0];
+  vector_eef[2] = vector_cf[2];
 }
 
 /**
@@ -155,7 +184,25 @@ void transformVelocityFromEEFToBF(
     PrVector3 vector_eef,
     PrVector3 &vector_bf
 ) {
-  // IMPLEMENT THIS
+  PrMatrix3 rotation_matrix;
+
+  double w = x_current_bf[3];
+  double x = x_current_bf[4];
+  double y = x_current_bf[5];
+  double z = x_current_bf[6];
+
+  rotation_matrix[0][0] = 1.0 - 2.0 * (y * y + z * z);
+  rotation_matrix[0][1] = 2.0 * (x * y - w * z);
+  rotation_matrix[0][2] = 2.0 * (x * z + w * y);
+
+  rotation_matrix[1][0] = 2.0 * (x * y + w * z);
+  rotation_matrix[1][1] = 1.0 - 2.0 * (x * x + z * z);
+  rotation_matrix[1][2] = 2.0 * (y * z - w * x);
+
+  rotation_matrix[2][0] = 2.0 * (x * z - w * y);
+  rotation_matrix[2][1] = 2.0 * (y * z + w * x);
+  rotation_matrix[2][2] = 1.0 - 2.0 * (x * x + y * y);
+  vector_bf = rotation_matrix * vector_eef;
 }
 
 /*
