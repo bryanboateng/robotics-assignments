@@ -127,7 +127,7 @@ void getImageJacobianCFToFF(
  *  depth of the circle wrt the camera [meters]
  */
 float estimateCircleDepth(float f, float diameter, Circle &crcl) {
-  return diameter * (crcl.radius * 2) / f;
+  return diameter * f / (crcl.radius * 2);
 }
 
 /**
