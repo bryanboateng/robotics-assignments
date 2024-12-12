@@ -111,7 +111,7 @@ void getImageJacobianCFToFF(
 
   Jv[2][0] = 0;
   Jv[2][1] = 0;
-  Jv[2][2] = (d - f) / z;
+  Jv[2][2] = d / z;
 }
 
 /**
