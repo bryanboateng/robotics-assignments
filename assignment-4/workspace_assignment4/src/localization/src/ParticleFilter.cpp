@@ -67,6 +67,14 @@ void ParticleFilter::initParticlesUniform() {
 void ParticleFilter::initParticlesGaussian(double mean_x, double mean_y,
 		double mean_theta, double std_xx, double std_yy, double std_tt) {
 	// TODO: here comes your code
+
+	for (int i = 0; i < this->numberOfParticles; i++) {
+		Particle* particle = this->particleSet[i];
+
+        particle->x = Util::gaussianRandom(mean_x, std_xx);
+        particle->y = Util::gaussianRandom(mean_y, std_yy);
+        particle->theta = Util::gaussianRandom(mean_theta, std_tt);
+	}
 }
 
 /**
