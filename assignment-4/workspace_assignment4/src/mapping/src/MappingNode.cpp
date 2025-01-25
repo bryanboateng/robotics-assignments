@@ -26,6 +26,8 @@ public:
 	~MappingNode();
 
 private:
+    std::map<std::pair<int, int>, int> hit_counter;
+    std::map<std::pair<int, int>, int> miss_counter;
 	ros::NodeHandle nodeHandle;
 
 	// we use the OccupancyGrid structure representing the reflection map
@@ -146,6 +148,37 @@ void MappingNode::laserReceived( const sensor_msgs::LaserScanConstPtr& laserScan
 	// odomPose contains the *current* pose of the robot, estimated from past odometry data.
     // You can use robotX, robotY, and robotTheta for the robot position and rotation on the map.
 	
+    for(int i = 0; i < laserScan->ranges.size(); i++) {
+        double laser_angle = laserScan->angle_min + i * laserScan->angle_increment;
+        double laser_range = laserScan->ranges[i];
+
+        if (laser_range < laserScan->range_min || laser_range > laserScan->range_max || isnan(laser_range)) {
+          continue;
+        }
+
+        double map_range = laser_range / this->map.info.resolution;
+
+        int endX = map_range * cos(laser_angle + robotTheta) + robotX;
+        int endY = map_range * sin(laser_angle + robotTheta) + robotY;
+
+        vector<pair<int, int> > line_cells = bresenhamLine(robotX, robotY, endX, endY);
+        std::pair<int, int> hit_cell = line_cells.back();
+        line_cells.pop_back();
+        for (const std::pair<int, int>& miss_cell : line_cells) {
+            miss_counter[miss_cell] += 1;
+            updateReflectionMapValue(
+                miss_cell.first,
+                miss_cell.second,
+                static_cast<double>(hit_counter[miss_cell]) / static_cast<double>(hit_counter[miss_cell] + miss_counter[miss_cell])
+            );
+        }
+        hit_counter[hit_cell] += 1;
+        updateReflectionMapValue(
+            hit_cell.first,
+            hit_cell.second,
+            static_cast<double>(hit_counter[hit_cell]) / static_cast<double>(hit_counter[hit_cell] + miss_counter[hit_cell])
+        );
+    }
 	// </your code>
 	///////////////////////////////////////////////////
 
