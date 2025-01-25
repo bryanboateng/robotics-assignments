@@ -227,6 +227,22 @@ void ParticleFilter::sampleMotionModel(double oldX, double oldY,
 void ParticleFilter::sampleMotionModelOdometry(double oldX, double oldY,
 		double oldTheta, double newX, double newY, double newTheta) {
 	// TODO: here comes your code
+	double diff_x = newX - oldX;
+	double diff_y = newY - oldY;
+
+	double true_delta_translation = std::sqrt(std::pow(diff_x, 2) + std::pow(diff_y, 2));
+	double true_delta_rot1 = atan2(diff_y, diff_x) - oldTheta;
+	double true_delta_rot2 = newTheta - oldTheta - true_delta_rot1;
+	for (int i = 0; i < this->numberOfParticles; i++) {
+		double noisy_delta_translation = true_delta_translation + Util::gaussianRandom(0, this->odomAlpha3 * std::abs(true_delta_translation) + this->odomAlpha4 * std::abs(true_delta_rot1 + true_delta_rot2));
+		double noisy_delta_rot1 = true_delta_rot1 + Util::gaussianRandom(0, this->odomAlpha1 * std::abs(true_delta_rot1) + this->odomAlpha2 * std::abs(true_delta_translation));
+		double noisy_delta_rot2 = true_delta_rot2 + Util::gaussianRandom(0, this->odomAlpha1 * std::abs(true_delta_rot2) + this->odomAlpha2 * std::abs(true_delta_translation));
+
+		Particle* particle = this->particleSet[i];
+		particle->x = particle->x + noisy_delta_translation * cos(oldTheta + noisy_delta_rot1);
+		particle->y = particle->y + noisy_delta_translation * sin(oldTheta + noisy_delta_rot1);
+		particle->theta = oldTheta + noisy_delta_rot1 + noisy_delta_rot2;
+	}
 }
 
 /**
