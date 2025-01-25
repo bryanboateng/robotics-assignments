@@ -56,6 +56,12 @@ void ParticleFilter::initParticlesUniform() {
     this->getLikelihoodField(mapWidth, mapHeight,mapResolution);
 
 	// TODO: here comes your code
+	for (int i = 0; i < this->numberOfParticles; i++) {
+		Particle* particle = this->particleSet[i];
+        particle->x = Util::uniformRandom(0, mapWidth * mapResolution);
+        particle->y = Util::uniformRandom(0, mapHeight * mapResolution);
+        particle->theta = Util::uniformRandom(0, 2 * M_PI);
+	}
 }
 
 void ParticleFilter::initParticlesGaussian(double mean_x, double mean_y,
