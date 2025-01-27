@@ -1,0 +1,59 @@
+ \documentclass[12pt,fleqn]{article}
+\pagestyle{empty}
+\usepackage[margin=2cm, top=3cm]{geometry} % Set margin and top spacing
+\renewcommand{\thesection}{\Alph{section}} % Sections labeled as A, B, C...
+\renewcommand{\thesubsection}{\arabic{subsection}} % Subsections labeled as 1, 2, 3...
+\renewcommand{\thesubsubsection}{(\alph{subsubsection})} % Subsubsections labeled as (a), (b), ...
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\setlength{\parindent}{0pt}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usepackage{listings}
+
+\usepackage{hyperref}
+\usepackage{makecell}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{siunitx}
+\numberwithin{subsection}{section}  
+
+
+\begin{document}
+\noindent 
+\huge
+\medskip
+TU Berlin Robotics\\
+\textbf{Lab Assignment \#4}\\
+
+\normalsize
+\noindent
+\bigskip
+Gruppe: 1\_Mon\_G \\
+\medskip
+\begin{tabular}[c]{|c|c|c|c|c|c|c|}
+    \hline
+    Student Name & B1 & C1 & C2 & C3 & C4 & C5\\
+    \hline
+    \hline
+    Bryan Oppong-Boateng & X & X & X & X & X & X \\
+    \hline
+    Gökay Sengün & X & X & X & X & X & X \\
+    \hline
+    Jarne Jüchser & X & X & X & X & X & X \\
+    \hline
+    Caspar Siemssen & X & X & X & X & X & X \\
+    \hline
+\end{tabular}
+
+\section{Bayes}
+\input{tasks/A/1}
+
+\section{Mapping with Raw Odometry}
+\input{tasks/B/2}
+
+\section{Monte Carlo Localization: Particle Filter}
+\input{tasks/C/3}
+\end{document}

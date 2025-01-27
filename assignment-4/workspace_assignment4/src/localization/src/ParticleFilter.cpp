@@ -56,24 +56,23 @@ void ParticleFilter::initParticlesUniform() {
     this->getLikelihoodField(mapWidth, mapHeight,mapResolution);
 
 	// TODO: here comes your code
-	for (int i = 0; i < this->numberOfParticles; i++) {
-		Particle* particle = this->particleSet[i];
-        particle->x = Util::uniformRandom(0, mapWidth * mapResolution);
-        particle->y = Util::uniformRandom(0, mapHeight * mapResolution);
-        particle->theta = Util::uniformRandom(0, 2 * M_PI);
+	for(int i = 0; i < numberOfParticles; i++){
+		Particle* particle = particleSet[i];
+		particle->x = Util::uniformRandom(0, mapWidth*mapResolution);
+		particle->y = Util::uniformRandom(0, mapHeight*mapResolution);
+		particle->theta = Util::uniformRandom(-M_PI, M_PI);
 	}
 }
 
 void ParticleFilter::initParticlesGaussian(double mean_x, double mean_y,
 		double mean_theta, double std_xx, double std_yy, double std_tt) {
 	// TODO: here comes your code
-
-	for (int i = 0; i < this->numberOfParticles; i++) {
-		Particle* particle = this->particleSet[i];
-
-        particle->x = Util::gaussianRandom(mean_x, std_xx);
-        particle->y = Util::gaussianRandom(mean_y, std_yy);
-        particle->theta = Util::gaussianRandom(mean_theta, std_tt);
+	for(int i = 0; i < numberOfParticles; i++){
+		Particle* particle = particleSet[i];
+		particle->x = Util::gaussianRandom(mean_x, std_xx);
+		particle->y = Util::gaussianRandom(mean_y, std_yy);
+		double theta = Util::gaussianRandom(mean_theta, std_tt);
+		particle->theta = Util::normalizeTheta(theta);
 	}
 }
 
@@ -104,7 +103,10 @@ void ParticleFilter::setMeasurementModelLikelihoodField(
 	// scan, instead of multiplying the probabilities, because: log(a*b) = log(a)+log(b).
 
 	// TODO: here comes your code
-	
+	double sigma = sigmaHit/likelihoodFieldResolution;
+	for(int i = 0; i < likelihoodFieldWidth*likelihoodFieldHeight; i++){
+		likelihoodField[i] = log((1-zRand)*Util::gaussian(distMap[i], sigma, 0) + zRand);
+	}
 	ROS_INFO("...DONE creating likelihood field!");
 }
 
@@ -200,7 +202,41 @@ void ParticleFilter::likelihoodFieldRangeFinderModel(
 		const sensor_msgs::LaserScanConstPtr & laserScan) {
 
 	// TODO: here comes your code
+	for(int particleIndex = 0; particleIndex < numberOfParticles; particleIndex++){
+		Particle* particle = particleSet[particleIndex];
+		double weight = 0;
+		bool outOfMap = false;
+		for(int laserIndex = 0; laserIndex < laserScan->ranges.size(); laserIndex += laserSkip){
+			double range = laserScan->ranges[laserIndex];
+			if(isnan(range) || range > laserScan->range_max || range < laserScan->range_min){
+				continue;
+			}
+			double laserAngle = laserScan->angle_min + laserIndex*laserScan->angle_increment;
+			double mapAngle = laserAngle + particle->theta;
+			double mapRange = range / likelihoodFieldResolution;
 
+
+			int particleXMap = particle->x / likelihoodFieldResolution;
+			int particleYMap = particle->y / likelihoodFieldResolution;
+
+			int endX = (int)(cos(mapAngle)*mapRange) + particleXMap;
+			int endY = (int)(sin(mapAngle)*mapRange) + particleYMap;
+			if(endX < 0 || endX >= likelihoodFieldWidth || endY < 0 || endY >= likelihoodFieldHeight){
+                weight = log(0.000000001);
+				break;
+			}
+			weight += likelihoodField[computeMapIndex(likelihoodFieldWidth, likelihoodFieldHeight, endX, endY)];
+		}
+        particle->weight = exp(weight);
+	}
+
+	double norm = 0;
+	for(int particleIndex = 0; particleIndex < numberOfParticles; particleIndex++){
+		norm += particleSet[particleIndex]->weight;
+	}
+	for(int particleIndex = 0; particleIndex < numberOfParticles; particleIndex++){
+		particleSet[particleIndex]->weight /= norm;
+	}
 }
 
 void ParticleFilter::setMotionModelOdometry(double alpha1, double alpha2,
@@ -209,7 +245,6 @@ void ParticleFilter::setMotionModelOdometry(double alpha1, double alpha2,
 	this->odomAlpha2 = alpha2;
 	this->odomAlpha3 = alpha3;
 	this->odomAlpha4 = alpha4;
-
 }
 
 /**
@@ -227,21 +262,21 @@ void ParticleFilter::sampleMotionModel(double oldX, double oldY,
 void ParticleFilter::sampleMotionModelOdometry(double oldX, double oldY,
 		double oldTheta, double newX, double newY, double newTheta) {
 	// TODO: here comes your code
-	double diff_x = newX - oldX;
-	double diff_y = newY - oldY;
+	double delta_trans_start = sqrt((newX - oldX)*(newX - oldX) + (newY - oldY)*(newY - oldY));
+	double delta_rot1_start = Util::diffAngle(oldTheta, atan2(newY - oldY, newX - oldX));
+	double delta = Util::diffAngle(oldTheta, newTheta);
+	double delta_rot2_start = Util::diffAngle(delta_rot1_start, delta);
 
-	double true_delta_translation = std::sqrt(std::pow(diff_x, 2) + std::pow(diff_y, 2));
-	double true_delta_rot1 = atan2(diff_y, diff_x) - oldTheta;
-	double true_delta_rot2 = newTheta - oldTheta - true_delta_rot1;
-	for (int i = 0; i < this->numberOfParticles; i++) {
-		double noisy_delta_translation = true_delta_translation + Util::gaussianRandom(0, this->odomAlpha3 * std::abs(true_delta_translation) + this->odomAlpha4 * std::abs(true_delta_rot1 + true_delta_rot2));
-		double noisy_delta_rot1 = true_delta_rot1 + Util::gaussianRandom(0, this->odomAlpha1 * std::abs(true_delta_rot1) + this->odomAlpha2 * std::abs(true_delta_translation));
-		double noisy_delta_rot2 = true_delta_rot2 + Util::gaussianRandom(0, this->odomAlpha1 * std::abs(true_delta_rot2) + this->odomAlpha2 * std::abs(true_delta_translation));
+	for(int i = 0; i < numberOfParticles; i++){
+		double delta_rot1 = delta_rot1_start + Util::gaussianRandom(0, odomAlpha1*abs(delta_rot1_start) + odomAlpha2*delta_trans_start);
+		double delta_trans = delta_trans_start + Util::gaussianRandom(0, odomAlpha3*delta_trans_start + odomAlpha4*abs(Util::normalizeTheta(delta_rot1_start + delta_rot2_start)));
+		double delta_rot2 = delta_rot2_start + Util::gaussianRandom(0, odomAlpha1*abs(delta_rot2_start) + odomAlpha2*delta_trans_start);
 
-		Particle* particle = this->particleSet[i];
-		particle->x = particle->x + noisy_delta_translation * cos(oldTheta + noisy_delta_rot1);
-		particle->y = particle->y + noisy_delta_translation * sin(oldTheta + noisy_delta_rot1);
-		particle->theta = oldTheta + noisy_delta_rot1 + noisy_delta_rot2;
+		Particle* particle = particleSet[i];
+		double angle = Util::normalizeTheta(particle->theta + delta_rot1);
+		particle->x += delta_trans * cos(angle);
+		particle->y += delta_trans * sin(angle);
+		particle->theta = Util::normalizeTheta(particle->theta + delta_rot1 + delta_rot2);
 	}
 }
 
@@ -250,6 +285,44 @@ void ParticleFilter::sampleMotionModelOdometry(double oldX, double oldY,
  */
 void ParticleFilter::resample() {
 	// TODO: here comes your code
+	double* cdf = new double[numberOfParticles];
+	Particle* newParticles = new Particle[numberOfParticles];
+	cdf[0] = particleSet[0]->weight;
+	for(int i = 1; i < numberOfParticles; i++){
+		cdf[i] = cdf[i-1] + particleSet[i]->weight;
+	}
+
+
+	double u = Util::uniformRandom(0, (double)1/(double)numberOfParticles);
+	int i = 0;
+	for(int j = 0; j < numberOfParticles; j++){
+		while(u > cdf[i]){
+			i++;
+		}
+		newParticles[j].x = particleSet[i]->x;
+		newParticles[j].y = particleSet[i]->y;
+		newParticles[j].theta = particleSet[i]->theta;
+		newParticles[j].weight = particleSet[i]->weight;
+		u += (double)1/(double)numberOfParticles;
+	}
+
+	for(int i = 0; i < numberOfParticles; i++){
+		particleSet[i]->x = newParticles[i].x;
+		particleSet[i]->y = newParticles[i].y;
+		particleSet[i]->theta = newParticles[i].theta;
+		particleSet[i]->weight = newParticles[i].weight;
+	}
+
+	Particle* best = particleSet[0];
+	for(int i = 0; i < numberOfParticles; i++){
+		if(particleSet[i]->weight > best->weight){
+			best = particleSet[i];
+		}
+	}
+	bestHypothesis = best;
+
+	delete[] cdf;
+	delete[] newParticles;
 }
 
 Particle* ParticleFilter::getBestHypothesis() {

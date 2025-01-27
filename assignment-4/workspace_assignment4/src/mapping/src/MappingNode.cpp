@@ -26,8 +26,6 @@ public:
 	~MappingNode();
 
 private:
-    std::map<std::pair<int, int>, int> hit_counter;
-    std::map<std::pair<int, int>, int> miss_counter;
 	ros::NodeHandle nodeHandle;
 
 	// we use the OccupancyGrid structure representing the reflection map
@@ -53,15 +51,17 @@ private:
 	//  returns all points from the starting point (x0, y0) and end point (x1, y1)
 	//  starting and end point are included in the returned result.
 	vector<pair<int, int> > bresenhamLine( int x0, int y0, int x1, int y1 );
-	
+
 	// use this method to update the reflection map
 	void updateReflectionMapValue(int x, int y, double value);
 
 	// </helpful methods>
 	///////////////////////////////////////////////////
-	
+
 	///////////////////////////////////////////////////
 	// <your declarations>
+
+	vector<vector<pair<int, int>>> countingGrid;
 
 	// </your declarations>
 	///////////////////////////////////////////////////
@@ -99,7 +99,10 @@ MappingNode::MappingNode(ros::NodeHandle n) :
 	// YOU may initialize all the data structures you need
 	// to implement simple counting method here!
 
-	
+ // initialize counting grid
+  countingGrid.resize(this->map.info.width,
+                        vector<pair<int, int>>(this->map.info.height, {0, 0}));
+
 	// </your code>
 	///////////////////////////////////////////////////
 
@@ -131,10 +134,10 @@ void MappingNode::laserReceived( const sensor_msgs::LaserScanConstPtr& laserScan
 		return;
 	}
 
-    // transform pose of robot to map coordinates
-    int robotX = odomPose.getOrigin().x() / this->map.info.resolution + this->map.info.width / 2;
-    int robotY = odomPose.getOrigin().y() / this->map.info.resolution + this->map.info.height / 2;
-    double robotTheta = tf::getYaw( odomPose.getRotation() );
+  // transform pose of robot to map coordinates
+  int robotX = odomPose.getOrigin().x() / this->map.info.resolution + this->map.info.width / 2;
+  int robotY = odomPose.getOrigin().y() / this->map.info.resolution + this->map.info.height / 2;
+  double robotTheta = tf::getYaw( odomPose.getRotation() );
 
     ///////////////////////////////////////////////////
 	// <your code>
@@ -142,43 +145,55 @@ void MappingNode::laserReceived( const sensor_msgs::LaserScanConstPtr& laserScan
 	// compute the reflection grid update value here
 	//  you should use updateReflectionMapValue(int x, int y, double value) for assigning the value
 	//  that you computed
-	
+
 	// 	the method bresenhamLine( int x0, int y0, int x1, int y1 ) will also be helpful.
-	
+
 	// odomPose contains the *current* pose of the robot, estimated from past odometry data.
-    // You can use robotX, robotY, and robotTheta for the robot position and rotation on the map.
-	
-    for(int i = 0; i < laserScan->ranges.size(); i++) {
-        double laser_angle = laserScan->angle_min + i * laserScan->angle_increment;
-        double laser_range = laserScan->ranges[i];
+  // You can use robotX, robotY, and robotTheta for the robot position and rotation on the map.
 
-        if (laser_range < laserScan->range_min || laser_range > laserScan->range_max || isnan(laser_range)) {
-          continue;
-        }
+  // iterate over all laser scan points
+  for (size_t i = 0; i < laserScan->ranges.size(); i++) {
+    // get the current range of the laser scan
+    double laserRange = laserScan->ranges[i];
 
-        double map_range = laser_range / this->map.info.resolution;
-
-        int endX = map_range * cos(laser_angle + robotTheta) + robotX;
-        int endY = map_range * sin(laser_angle + robotTheta) + robotY;
-
-        vector<pair<int, int> > line_cells = bresenhamLine(robotX, robotY, endX, endY);
-        std::pair<int, int> hit_cell = line_cells.back();
-        line_cells.pop_back();
-        for (const std::pair<int, int>& miss_cell : line_cells) {
-            miss_counter[miss_cell] += 1;
-            updateReflectionMapValue(
-                miss_cell.first,
-                miss_cell.second,
-                static_cast<double>(hit_counter[miss_cell]) / static_cast<double>(hit_counter[miss_cell] + miss_counter[miss_cell])
-            );
-        }
-        hit_counter[hit_cell] += 1;
-        updateReflectionMapValue(
-            hit_cell.first,
-            hit_cell.second,
-            static_cast<double>(hit_counter[hit_cell]) / static_cast<double>(hit_counter[hit_cell] + miss_counter[hit_cell])
-        );
+    // check if the range is valid
+    if (laserRange < laserScan->range_min ||
+        laserRange > laserScan->range_max || isnan(laserRange)) {
+      continue;
     }
+
+    // compute the angle and the position of the laser scan point
+    double laserAngle = laserScan->angle_min + i * laserScan->angle_increment;
+
+    double mapAngle = robotTheta + laserAngle;
+    double mapRange = laserRange / this->map.info.resolution;
+    int mapEndX = robotX + mapRange * cos(mapAngle);
+    int mapEndY = robotY + mapRange * sin(mapAngle);
+
+    // get all point from laser line with bresenham algorithm
+    vector<pair<int, int>> line =
+        bresenhamLine(robotX, robotY, mapEndX, mapEndY);
+
+    // update the counting grid for all points in the line
+    for (size_t j = 0; j < line.size(); j++) {
+      pair<int, int> cell = line[j];
+      int x = cell.first;
+      int y = cell.second;
+
+      if (x == mapEndX && y == mapEndY) { // hits
+	  	countingGrid[x][y].first++;
+      } else {	// misses
+      	countingGrid[x][y].second++;
+      }
+
+      double hits = countingGrid[x][y].first;
+      double misses = countingGrid[x][y].second;
+
+      // update the reflection map value
+      updateReflectionMapValue(x, y, hits / (hits + misses));
+    }
+  }
+
 	// </your code>
 	///////////////////////////////////////////////////
 
@@ -229,7 +244,7 @@ vector<pair<int, int> > MappingNode::bresenhamLine( int x0, int y0, int x1, int 
 			error += deltax;
 		}
 	}
-	
+
 	return result;
 }
 
